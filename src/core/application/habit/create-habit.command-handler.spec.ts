@@ -5,10 +5,12 @@ import { CreateHabitCommand } from './create-habit.command'
 import { UserNotFoundError } from '../user-not-found.error'
 import { UserMother } from '../../test/user/user.mother'
 import { HabitMother } from '../../test/habit/habit.mother'
-import { InvalidHabitDuration } from '../../domain/habit/invalid-habit.duration'
+import { InvalidHabitSchedule } from '../../domain/habit/invalid-habit.schedule'
 import { Habit } from '../../domain/habit/habit'
 import { DuplicatedHabitNameError } from './duplicated-habit-name.error'
 import { v4 as uuidv4 } from 'uuid'
+import { InvalidNameError } from '../../domain/habit/invalid-name.error'
+import { InvalidIdError } from '../../domain/invalid-id.error'
 
 describe('CreateHabitCommandHandler', () => {
   let habitRepository: HabitInMemoryRepository
@@ -90,14 +92,10 @@ describe('CreateHabitCommandHandler', () => {
   describe('When the habit frequency and rest time are not valid', () => {
     const habit = HabitMother.create()
     const user = new UserMother().withId(habit.userId).build()
-    const command = new CreateHabitCommand({
-      id: habit.id,
-      name: habit.name,
-      frequency: habit.frequency,
-      duration: 5000,
-      restTime: habit.restTime,
-      userId: habit.userId,
-    })
+    const command = createCommandFromHabit(habit)
+    command.duration = 600
+    command.restTime = 10
+    command.frequency = 600
 
     beforeEach(() => {
       userRepository.addUsers([user])
@@ -105,10 +103,61 @@ describe('CreateHabitCommandHandler', () => {
 
     it('should throw an error', () => {
       expect(() => commandHandler.handle(command)).toThrowError(
-        InvalidHabitDuration.withFrequencyAndDuration(
+        InvalidHabitSchedule.create(
           command.frequency,
           command.duration,
+          command.restTime,
         ),
+      )
+    })
+
+    it('should not save the habit', () => {
+      try {
+        commandHandler.handle(command)
+      } catch (error) {}
+
+      expect(habitRepository.habits).toHaveLength(0)
+    })
+  })
+
+  describe('When the habit name is not valid', () => {
+    const habit = HabitMother.create()
+    const user = new UserMother().withId(habit.userId).build()
+    const command = createCommandFromHabit(habit)
+    command.name = 'a'
+
+    beforeEach(() => {
+      userRepository.addUsers([user])
+    })
+
+    it('should throw an error', () => {
+      expect(() => commandHandler.handle(command)).toThrowError(
+        InvalidNameError.withInvalidValue(command.name),
+      )
+    })
+
+    it('should not save the habit', () => {
+      try {
+        commandHandler.handle(command)
+      } catch (error) {}
+
+      expect(habitRepository.habits).toHaveLength(0)
+    })
+  })
+
+  describe('When the habit id is not valid', () => {
+    const habit = HabitMother.create()
+    const user = new UserMother().withId(habit.userId).build()
+    const command = createCommandFromHabit(habit)
+    command.id = 'invalid-id'
+
+    beforeEach(() => {
+      userRepository.addUsers([user])
+    })
+
+    it('should throw an error', () => {
+      expect(() => commandHandler.handle(command)).toThrowError(
+        InvalidIdError.withInvalidValue(command.id),
       )
     })
 
@@ -124,11 +173,11 @@ describe('CreateHabitCommandHandler', () => {
 
 function createCommandFromHabit(habit: Habit): CreateHabitCommand {
   return new CreateHabitCommand({
-    id: habit.id,
-    name: habit.name,
-    frequency: habit.frequency,
-    duration: habit.duration,
-    restTime: habit.restTime,
+    id: habit.id.value,
+    name: habit.name.value,
+    frequency: habit.schedule.frequency,
+    duration: habit.schedule.duration,
+    restTime: habit.schedule.restTime,
     userId: habit.userId,
   })
 }

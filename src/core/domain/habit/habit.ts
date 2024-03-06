@@ -1,27 +1,27 @@
-import { InvalidHabitDuration } from './invalid-habit.duration'
+import { Schedule } from './schedule'
+import { HabitId } from './habit.id'
+import { Name } from './name'
 
 export class Habit {
   private constructor(
-    readonly id: string,
-    readonly name: string,
-    readonly frequency: string,
-    readonly duration: number,
-    readonly restTime: number,
+    readonly id: HabitId,
+    readonly name: Name,
+    readonly schedule: Schedule,
     readonly userId: string,
   ) {}
 
   static create(
     id: string,
     name: string,
-    frequency: string,
+    frequency: number,
     duration: number,
     restTime: number,
     userId: string,
   ): Habit {
-    if (frequency === 'daily' && duration > 1440) {
-      throw InvalidHabitDuration.withFrequencyAndDuration(frequency, duration)
-    }
+    const habitId = HabitId.create(id)
+    const habitName = Name.create(name)
+    const schedule = Schedule.create(frequency, duration, restTime)
 
-    return new Habit(id, name, frequency, duration, restTime, userId)
+    return new Habit(habitId, habitName, schedule, userId)
   }
 }

@@ -4,6 +4,7 @@ import { UserNotFoundError } from '../user-not-found.error'
 import { Habit } from '../../domain/habit/habit'
 import { CreateHabitCommand } from './create-habit.command'
 import { DuplicatedHabitNameError } from './duplicated-habit-name.error'
+import { Name } from '../../domain/habit/name'
 
 export class CreateHabitCommandHandler {
   constructor(
@@ -12,11 +13,13 @@ export class CreateHabitCommandHandler {
   ) {}
 
   handle(command: CreateHabitCommand): void {
+    const name = Name.create(command.name)
+
     if (!this.userRepository.findById(command.userId)) {
       throw UserNotFoundError.withId(command.userId)
     }
 
-    if (this.repository.findByName(command.name)) {
+    if (this.repository.findByName(name)) {
       throw DuplicatedHabitNameError.withName(command.name)
     }
 

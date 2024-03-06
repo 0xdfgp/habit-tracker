@@ -1,6 +1,7 @@
 import { Habit } from './habit'
+import { Name } from './name'
 
 export interface HabitRepository {
   save(habit: Habit): void
-  findByName(name: string): Habit | undefined
+  findByName(name: Name): Habit | undefined
 }

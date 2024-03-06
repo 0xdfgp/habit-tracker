@@ -1,12 +1,13 @@
 import { Habit } from '../../domain/habit/habit'
 import { v4 as uuidv4 } from 'uuid'
+import { HabitId } from '../../domain/habit/habit.id'
 
 export class HabitMother {
-  private id = 'id'
+  private id = HabitId.generate()
   private habitName = 'name'
-  private frequency = 'daily'
-  private duration = 1
-  private restTime = 1
+  private frequency = 86400
+  private duration = 60
+  private restTime = 600
   private userId = uuidv4()
 
   build(): Habit {

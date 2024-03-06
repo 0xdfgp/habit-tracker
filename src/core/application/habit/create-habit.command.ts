@@ -1,7 +1,7 @@
 export class CreateHabitCommand {
   id: string
   name: string
-  frequency: string
+  frequency: number
   duration: number
   restTime: number
   userId: string
@@ -9,7 +9,7 @@ export class CreateHabitCommand {
   constructor(params: {
     id: string
     name: string
-    frequency: string
+    frequency: number
     duration: number
     restTime: number
     userId: string
