@@ -25,6 +25,10 @@ export class HabitMother {
     return new HabitMother().build()
   }
 
+  static createWithId(id: string): Habit {
+    return new HabitMother().withId(id).build()
+  }
+
   withId(id: string) {
     this.id = id
     return this

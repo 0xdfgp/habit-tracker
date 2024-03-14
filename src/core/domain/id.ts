@@ -3,14 +3,15 @@ import { validate as uuidValidate } from 'uuid'
 import { InvalidIdError } from './invalid-id.error'
 
 export abstract class Id {
-  protected constructor(readonly value: string) {
+  protected constructor(readonly value: string) {}
+  static generate(): string {
+    return uuidv4()
+  }
+
+  protected static guardValidId(value: string): void {
     if (!uuidValidate(value)) {
       throw InvalidIdError.withInvalidValue(value)
     }
-  }
-
-  static generate(): string {
-    return uuidv4()
   }
 
   equals(id: Id): boolean {

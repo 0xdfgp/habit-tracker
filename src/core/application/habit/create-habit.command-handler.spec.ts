@@ -11,19 +11,23 @@ import { DuplicatedHabitNameError } from './duplicated-habit-name.error'
 import { v4 as uuidv4 } from 'uuid'
 import { InvalidNameError } from '../../domain/habit/invalid-name.error'
 import { InvalidIdError } from '../../domain/invalid-id.error'
+import { InMemoryEventPublisher } from '../../infrastructure/in-memory/in-memory.event-publisher'
 
 describe('CreateHabitCommandHandler', () => {
   let habitRepository: HabitInMemoryRepository
   let userRepository: UserInMemoryRepository
+  let eventPublisher: InMemoryEventPublisher
   let commandHandler: CreateHabitCommandHandler
 
   beforeEach(() => {
     habitRepository = new HabitInMemoryRepository()
     userRepository = new UserInMemoryRepository()
+    eventPublisher = new InMemoryEventPublisher()
 
     commandHandler = new CreateHabitCommandHandler(
       habitRepository,
       userRepository,
+      eventPublisher,
     )
   })
 
